@@ -52,20 +52,20 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     description = models.TextField('description', blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     
-    class TypeOfFilm(models.TextChoices):
+    class Type(models.TextChoices):
         MOVIE = 'MV', _('Movie')
         TV_SHOW = 'SH', _('TV Show')
 
-    type_of_film = models.CharField(
+    type = models.CharField(
         max_length=2,
-        choices=TypeOfFilm.choices,
-        default=TypeOfFilm.MOVIE,
+        choices=Type.choices,
+        default=Type.MOVIE,
     )
 
     def is_upperclass(self):
-        return self.type_of_film in {
-            self.type_of_film.MOVIE,
-            self.type_of_film.TV_SHOW,
+        return self.type in {
+            self.type.MOVIE,
+            self.type.TV_SHOW,
         } 
             
     rating = models.FloatField('rating', blank=True,
