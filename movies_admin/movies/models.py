@@ -73,6 +73,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
                                            MaxValueValidator(100)]) 
     
     genres = models.ManyToManyField(Genre, through='GenreFilmwork')
+    persons = models.ManyToManyField(Person, through='PersonFilmwork')
     
     class Meta:
         # Ваши таблицы находятся в нестандартной схеме. Это нужно указать в классе модели
@@ -93,7 +94,10 @@ class GenreFilmwork(UUIDMixin):
         db_table = "content\".\"genre_film_work" 
 
 class PersonFilmwork(UUIDMixin):
-    film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
+    film_work = models.ForeignKey('Filmwork', on_delete = models.CASCADE)
     role = models.TextField('role', null=True)
     created = models.DateTimeField(auto_now_add=True) 
+    
+    class Meta:
+        db_table = "content\".\"person_film_work"
