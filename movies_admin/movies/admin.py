@@ -21,8 +21,3 @@ class FilmworkAdmin(admin.ModelAdmin):
 
 class PersonFilmworkInline(admin.TabularInline):
     model = PersonFilmwork
-
-
-@admin.register(Filmwork)
-class FilmworkAdmin(admin.ModelAdmin):
-    inlines = (PersonFilmworkInline,) 
