@@ -52,7 +52,7 @@ class PostgresSaver():
         col_count = ', '.join(['%s'] * len(column_names)) 
         items = [astuple(item) for item in data]
         with conn.cursor() as cursor:
-            args = ', '.join(cursor.mogrify(f"{col_count}", item).decode('utf-8') for item in items)
+            args = ', '.join(cursor.mogrify(f"({col_count})", item).decode('utf-8') for item in items)
             column_names = ', '.join(column_names)
             query = f"""
                     INSERT INTO content.{table_name} ({column_names}) 
@@ -63,7 +63,17 @@ class PostgresSaver():
                 cursor.execute(query)
             except psycopg2.Error as err:
                 logging.error(err)
-            
+        with conn.cursor() as cursor:
+            query = f"""
+                    SELECT COUNT(*) FROM content.{table_name};
+                    """
+            try:
+                cursor.execute(query)
+                print(cursor.fetchall()) 
+            except psycopg2.Error as err:
+                print(err)
+                logging.error(err)
+        
  
 def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""

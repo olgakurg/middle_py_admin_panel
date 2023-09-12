@@ -6,7 +6,7 @@ table_to_dataclass = {
      'person' : 'Person',
      'film_work' : 'Filmwork',
      'person_film_work' : 'PersonFilmwork',
-     'genre_film_worl' : 'GenreFilmwork',
+     'genre_film_work' : 'GenreFilmwork',
 }
 
 TABLE_COLUMNS_NAME = {
@@ -31,6 +31,7 @@ TABLE_COLUMNS_NAME = {
             'title',
             'description',
             'creation_date',
+            'file_path',  
             'rating',
             'type',
             'created',
