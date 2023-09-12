@@ -16,8 +16,7 @@ logging.basicConfig(level=logging.INFO, filename="py_log.log",filemode="w")
 def conn_context(db_path: str):
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
-    yield conn # С конструкцией yield вы познакомитесь в следующем модуле 
-    # Пока воспринимайте её как return, после которого код может продолжить выполняться дальше
+    yield conn 
     conn.close() 
 
 
@@ -60,17 +59,16 @@ class SQLiteExtractor():
             lst.append(obj(**dict(result)))
         return lst   
     
-    def exract_genres(self):
+    def extract_genres(self):
         genres = self.extract_to_dataclasses('genres')
         return genres
 
 class PostgresSaver():
-    def __init__(self, conn, cursor):
+    def __init__(self, conn):
         self.conn = conn
-        self.cursor = cursor
     
     def save_genres(self, data):
-        
+        conn = self.conn
         table_name  = 'genre'
         column_names = (
             'id',
@@ -81,35 +79,32 @@ class PostgresSaver():
         )
 
         col_count = ', '.join(['%s'] * len(column_names)) 
-        cursor = self.cursor
-        
-        item = data[0]
-        args = ','.join(cursor.mogrify(f"({col_count})", row).decode('utf-8') for row in astuple(item))
-        
+        items = [astuple(data[0]), astuple(data[1])]
+        cursor = conn.cursor()
+        args = ', '.join(cursor.mogrify("(%s,%s,%s,%s,%s)", item).decode('utf-8') for item in items)
+        column_names = ', '.join(column_names)
         query = f"""
-                       INSERT INTO content.{table_name} {column_names} 
-                       VALUES {args}
-                       ON CONFLICT (id) DO NOTHING;
-                    """
-            
-        #cursor.execute(query)
-        print (query)
-
-        
+                   INSERT INTO content.{table_name} ({column_names}) 
+                   VALUES {args}
+                   ON CONFLICT (id) DO NOTHING;
+                """
+        cursor.execute(query)
+        print(query)
 
 #метод-последовательсность - genre, person, film_work, personfilmwork, genrefilmwork.
 
-def load_from_sqlite(connection: sqlite3.Connection): #, pg_conn: _connection):
+def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""
-    postgres_saver = PostgresSaver(pg_conn, cursor)
+    postgres_saver = PostgresSaver(pg_conn)
     sqlite_extractor = SQLiteExtractor(connection)
 
-    data = sqlite_extractor.exract_genres()
+    data = sqlite_extractor.extract_genres()
     postgres_saver.save_genres(data)
 
 if __name__ == '__main__':
     dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}   
     db_path = 'db.sqlite'
     
-    with conn_context(db_path) as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, pg_conn.cursor as cursor:
-        load_from_sqlite(sqlite_conn, pg_conn, cursor)
+    with conn_context(db_path) as sqlite_conn:
+        with psycopg2.connect(**dsl) as pg_conn:
+            load_from_sqlite(sqlite_conn, pg_conn)
