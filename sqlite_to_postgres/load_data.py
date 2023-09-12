@@ -3,9 +3,7 @@ import sqlite3
 import psycopg2
 
 <<<<<<< Updated upstream
-
 def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
-=======
 from dataclasses import astuple
 from data_classes import Genre, Person, GenreFilmwork, PersonFilmwork, Filmwork
 from settings import dsl, db_path, table_to_dataclass, TABLE_COLUMNS_NAME
@@ -70,30 +68,15 @@ class PostgresSaver():
             
  
 def load_from_sqlite(connection, pg_conn):
->>>>>>> Stashed changes
     """Основной метод загрузки данных из SQLite в Postgres"""
-    # postgres_saver = PostgresSaver(pg_conn)
-    # sqlite_extractor = SQLiteExtractor(connection)
-
-    # data = sqlite_extractor.extract_movies()
-    # postgres_saver.save_all_data(data)
-
-<<<<<<< Updated upstream
-
-if __name__ == '__main__':
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}
-    with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
-        load_from_sqlite(sqlite_conn, pg_conn)
-=======
+    postgres_saver = PostgresSaver(pg_conn)
+    sqlite_extractor = SQLiteExtractor(connection)
     for table_name in table_to_dataclass:
         data = sqlite_extractor.extract_to_dataclasses(table_name)
         postgres_saver.insert_data(data, table_name)
-    
+
 
 if __name__ == '__main__':
-
-    
-    with conn_context(db_path) as sqlite_conn:
-        with psycopg2.connect(**dsl) as pg_conn:
+   
+    with conn_context(db_path) as sqlite_conn, psycopg2.connect(**dsl) as pg_conn:
             load_from_sqlite(sqlite_conn, pg_conn)
->>>>>>> Stashed changes
