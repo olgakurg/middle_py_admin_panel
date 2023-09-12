@@ -32,14 +32,14 @@ class Filmwork:
 @dataclass(frozen=True)  
 class GenreFilmwork:
     id: uuid.UUID
-    film_work_id: uuid.UUID
     genre_id: uuid.UUID
+    film_work_id: uuid.UUID
     created_at: datetime
 
 @dataclass(frozen=True)   
 class PersonFilmwork:
     id: uuid.UUID
-    film_work_id: uuid.UUID
     person_id: uuid.UUID
+    film_work_id: uuid.UUID
     role: str
     created_at: datetime

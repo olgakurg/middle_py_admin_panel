@@ -63,18 +63,8 @@ class PostgresSaver():
                 cursor.execute(query)
             except psycopg2.Error as err:
                 logging.error(err)
-                print(table_name, err)
-        with conn.cursor() as cursor:
-            query = f"""
-                    SELECT COUNT(*) FROM content.{table_name};
-                    """
-            try:
-                cursor.execute(query)
-                print(cursor.fetchall()) 
-            except psycopg2.Error as err:
-                print(table_name, err)
-                logging.error(err)
-        
+            conn.commit()
+
  
 def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""
