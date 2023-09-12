@@ -2,8 +2,6 @@ import sqlite3
 
 import psycopg2
 
-<<<<<<< Updated upstream
-def load_from_sqlite(connection: sqlite3.Connection, pg_conn: _connection):
 from dataclasses import astuple
 from data_classes import Genre, Person, GenreFilmwork, PersonFilmwork, Filmwork
 from settings import dsl, db_path, table_to_dataclass, TABLE_COLUMNS_NAME
