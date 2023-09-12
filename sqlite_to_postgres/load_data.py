@@ -1,11 +1,11 @@
 import sqlite3
-import psycopg2
-from psycopg2.extensions import connection as _connection
-from psycopg2.extras import DictCursor
 
-import uuid
-from dataclasses import dataclass, astuple
-from datetime import datetime
+import psycopg2
+
+from dataclasses import astuple
+from data_classes import Genre, Person, GenreFilmwork, PersonFilmwork, Filmwork
+from settings import dsl, db_path, table_to_dataclass, TABLE_COLUMNS_NAME
+
 
 from contextlib import contextmanager  
 import logging
@@ -20,22 +20,6 @@ def conn_context(db_path: str):
     conn.close() 
 
 
-@dataclass(frozen=True)
-class Genre:
-    id: uuid.UUID
-    name: str
-    description: str
-    created_at: datetime
-    updated_at: datetime
-
-table_to_dataclass = {
-     'genre' : 'Genre',
-     'person' : 'Person',
-     'film_work' : 'Filmwork',
-     'person_film_work' : 'PersonFilmwork',
-     'genre_film_worl' : 'GenreFilmwork',
-}
-
 class SQLiteExtractor():
 
     def __init__(self, conn):
@@ -45,7 +29,6 @@ class SQLiteExtractor():
         conn = self.conn
         conn.row_factory = sqlite3.Row  
         curs = conn.cursor()
-        table_name = 'genre'
         try:
             curs.execute(f"SELECT * FROM {table_name};")
         except sqlite3.Error as err:
@@ -59,52 +42,40 @@ class SQLiteExtractor():
             lst.append(obj(**dict(result)))
         return lst   
     
-    def extract_genres(self):
-        genres = self.extract_to_dataclasses('genres')
-        return genres
-
 class PostgresSaver():
     def __init__(self, conn):
         self.conn = conn
     
-    def save_genres(self, data):
+    def insert_data(self, data, table_name):
         conn = self.conn
-        table_name  = 'genre'
-        column_names = (
-            'id',
-            'name',
-            'description',
-            'created',
-            'modified',
-        )
-
+        column_names = TABLE_COLUMNS_NAME[table_name]
         col_count = ', '.join(['%s'] * len(column_names)) 
-        items = [astuple(data[0]), astuple(data[1])]
-        cursor = conn.cursor()
-        args = ', '.join(cursor.mogrify("(%s,%s,%s,%s,%s)", item).decode('utf-8') for item in items)
-        column_names = ', '.join(column_names)
-        query = f"""
-                   INSERT INTO content.{table_name} ({column_names}) 
-                   VALUES {args}
-                   ON CONFLICT (id) DO NOTHING;
-                """
-        cursor.execute(query)
-        print(query)
+        items = [astuple(item) for item in data]
+        with conn.cursor() as cursor:
+            args = ', '.join(cursor.mogrify(f"({col_count})", item).decode('utf-8') for item in items)
+            column_names = ', '.join(column_names)
+            query = f"""
+                    INSERT INTO content.{table_name} ({column_names}) 
+                    VALUES {args}
+                    ON CONFLICT (id) DO NOTHING;
+                    """
+            try: 
+                cursor.execute(query)
+            except psycopg2.Error as err:
+                logging.error(err)
+            conn.commit()
 
-#метод-последовательсность - genre, person, film_work, personfilmwork, genrefilmwork.
-
+ 
 def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""
     postgres_saver = PostgresSaver(pg_conn)
     sqlite_extractor = SQLiteExtractor(connection)
+    for table_name in table_to_dataclass:
+        data = sqlite_extractor.extract_to_dataclasses(table_name)
+        postgres_saver.insert_data(data, table_name)
 
-    data = sqlite_extractor.extract_genres()
-    postgres_saver.save_genres(data)
 
 if __name__ == '__main__':
-    dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}   
-    db_path = 'db.sqlite'
-    
-    with conn_context(db_path) as sqlite_conn:
-        with psycopg2.connect(**dsl) as pg_conn:
+   
+    with conn_context(db_path) as sqlite_conn, psycopg2.connect(**dsl) as pg_conn:
             load_from_sqlite(sqlite_conn, pg_conn)
