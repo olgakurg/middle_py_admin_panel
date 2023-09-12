@@ -63,6 +63,7 @@ class PostgresSaver():
                 cursor.execute(query)
             except psycopg2.Error as err:
                 logging.error(err)
+                print(table_name, err)
         with conn.cursor() as cursor:
             query = f"""
                     SELECT COUNT(*) FROM content.{table_name};
@@ -71,7 +72,7 @@ class PostgresSaver():
                 cursor.execute(query)
                 print(cursor.fetchall()) 
             except psycopg2.Error as err:
-                print(err)
+                print(table_name, err)
                 logging.error(err)
         
  
