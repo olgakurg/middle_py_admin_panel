@@ -45,6 +45,12 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     title = models.CharField(_('title'), max_length=255)
     description = models.TextField(_('description'), blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
+    file_path = models.TextField(_('file_path'), null=True )
+
+            
+    rating = models.FloatField(_('rating'), blank=True,
+                               validators=[MinValueValidator(0),
+                                           MaxValueValidator(100)]) 
     
     class Type(models.TextChoices):
         MOVIE = 'MV', _('Movie')
@@ -62,10 +68,6 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
             self.type.TV_SHOW,
         } 
             
-    rating = models.FloatField(_('rating'), blank=True,
-                               validators=[MinValueValidator(0),
-                                           MaxValueValidator(100)]) 
-    
     genres = models.ManyToManyField(Genre, through='GenreFilmwork')
     persons = models.ManyToManyField(Person, through='PersonFilmwork')
     
@@ -93,3 +95,5 @@ class PersonFilmwork(UUIDMixin):
     
     class Meta:
         db_table = "content\".\"person_film_work"
+        unique_together = (('film_work', 'person', 'role'),)
+
