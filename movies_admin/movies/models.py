@@ -83,7 +83,7 @@ class GenreFilmwork(UUIDMixin):
 class PersonFilmwork(UUIDMixin):
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
     film_work = models.ForeignKey('Filmwork', on_delete = models.CASCADE)
-    role = models.TextField(_('role'), null=True)
+    role = models.TextField(_('role'), default='somerole')
     created = models.DateTimeField(auto_now_add=True) 
     
     class Meta:
