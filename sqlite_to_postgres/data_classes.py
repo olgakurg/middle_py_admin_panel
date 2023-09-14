@@ -23,7 +23,6 @@ class Filmwork:
     title: str
     description: str
     creation_date: datetime
-    file_path: str
     rating: float
     type: str
     created_at: datetime
@@ -43,3 +42,12 @@ class PersonFilmwork:
     film_work_id: uuid.UUID
     role: str
     created_at: datetime
+
+
+table_to_dataclass = {
+     'genre' : Genre,
+     'person' : Person,
+     'film_work' : Filmwork,
+     'person_film_work' : PersonFilmwork,
+     'genre_film_work' : GenreFilmwork,
+}

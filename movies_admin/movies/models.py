@@ -44,10 +44,8 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
   
     title = models.CharField(_('title'), max_length=255)
     description = models.TextField(_('description'), blank=True)
-    creation_date = models.DateTimeField(auto_now_add=True)
-    file_path = models.TextField(_('file_path'), null=True )
-
-            
+    creation_date = models.DateTimeField(_('date of film creation', blank=True))
+                
     rating = models.FloatField(_('rating'), blank=True,
                                validators=[MinValueValidator(0),
                                            MaxValueValidator(100)]) 
@@ -61,13 +59,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         choices=Type.choices,
         default=Type.MOVIE,
     )
-
-    def is_upperclass(self):
-        return self.type in {
-            self.type.MOVIE,
-            self.type.TV_SHOW,
-        } 
-            
+           
     genres = models.ManyToManyField(Genre, through='GenreFilmwork')
     persons = models.ManyToManyField(Person, through='PersonFilmwork')
     
@@ -86,11 +78,12 @@ class GenreFilmwork(UUIDMixin):
 
     class Meta:
         db_table = "content\".\"genre_film_work" 
+        unique_together = (('film_work', 'genre'),)
 
 class PersonFilmwork(UUIDMixin):
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
     film_work = models.ForeignKey('Filmwork', on_delete = models.CASCADE)
-    role = models.TextField(_('role'), null=True)
+    role = models.TextField(_('role'), null=False, default='actor')
     created = models.DateTimeField(auto_now_add=True) 
     
     class Meta:
