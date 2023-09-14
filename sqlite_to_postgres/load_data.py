@@ -46,7 +46,6 @@ class SQLiteExtractor():
                 logging.error(err)
                 
         results = curs.fetchall()
-        print(iteration, 'SELECTED', len(results))
         lst = []
         for result in results:
             lst.append(data_class(**dict(result)))
@@ -76,7 +75,7 @@ class PostgresSaver():
             conn.commit()
 
  
-def load_from_sqlite(connection):#, pg_conn):
+def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""
     postgres_saver = PostgresSaver(pg_conn)
     sqlite_extractor = SQLiteExtractor(connection)

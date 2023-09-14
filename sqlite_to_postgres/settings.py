@@ -25,7 +25,6 @@ TABLE_COLUMNS_NAME = {
             'title',
             'description',
             'creation_date',
-            'file_path',  
             'rating',
             'type',
             'created',
