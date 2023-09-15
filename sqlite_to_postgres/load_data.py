@@ -3,7 +3,7 @@ import sqlite3
 import psycopg2
 from dataclasses import astuple, fields
 from data_classes import (Genre, Person, GenreFilmwork,
-                          PersonFilmwork, Filmwork, table_to_dataclass)
+                          PersonFilmwork, Filmwork, TABLE_TO_DATACLASS)
 from settings import DSL, DB_PATH, TABLE_COLUMNS_NAME, BATCH_SIZE
 from contextlib import contextmanager
 import logging
@@ -22,32 +22,31 @@ def conn_context(db_path: str):
 class SQLiteExtractor():
     def __init__(self, conn):
         self.conn = conn
-
-    def extract_to_dataclasses(self, table_name, iteration):
-        data_class = table_to_dataclass[table_name]
-        column_names = ', '.join(field.name for field in fields(data_class))
-        skipped_num = BATCH_SIZE * (iteration-1)
-        query = f"""
-                SELECT {column_names}
-                FROM {table_name}
-                ORDER BY created_at
-                LIMIT {BATCH_SIZE}
-                OFFSET {skipped_num};
-                """
+ 
+    def upload_batches(self, table_name, postgres_saver):
         conn = self.conn
         conn.row_factory = sqlite3.Row
         curs = conn.cursor()
+        data_class = TABLE_TO_DATACLASS[table_name]
+        column_names = ', '.join(field.name for field in fields(data_class))
+        query = f"""
+                SELECT {column_names}
+                FROM {table_name};
+                """
         try:
             curs.execute(query)
-        except sqlite3.Error as err:
+        except sqlite3.Error as err:                
             logging.error(err)
-        results = curs.fetchall()
-        lst = []
-        for result in results:
-            lst.append(data_class(**dict(result)))
-        return lst
-
-
+        while True:
+            batch = curs.fetchmany(BATCH_SIZE)
+            if not batch:
+                break
+            data = []
+            for result in batch:
+                data.append(data_class(**dict(result)))                  
+            postgres_saver.insert_data(data, table_name)
+                       
+   
 class PostgresSaver():
     def __init__(self, conn):
         self.conn = conn
@@ -76,14 +75,8 @@ def load_from_sqlite(connection, pg_conn):
     """Основной метод загрузки данных из SQLite в Postgres"""
     postgres_saver = PostgresSaver(pg_conn)
     sqlite_extractor = SQLiteExtractor(connection)
-    for table_name in table_to_dataclass:
-        current_batch_size = BATCH_SIZE
-        iteration = 0
-        while current_batch_size >= BATCH_SIZE:
-            iteration += 1
-            data = sqlite_extractor.extract_to_dataclasses(table_name, iteration)
-            current_batch_size = len(data)
-            postgres_saver.insert_data(data, table_name)
+    for table_name in TABLE_TO_DATACLASS:
+        sqlite_extractor.upload_batches(table_name, postgres_saver)
 
 
 if __name__ == '__main__':
