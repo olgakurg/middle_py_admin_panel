@@ -1,5 +1,5 @@
-dsl = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}   
-db_path = 'db.sqlite'
+DSL = {'dbname': 'movies_database', 'user': 'app', 'password': '123qwe', 'host': '127.0.0.1', 'port': 5432}   
+DB_PATH = 'db.sqlite'
 
 BATCH_SIZE  = 1000
 

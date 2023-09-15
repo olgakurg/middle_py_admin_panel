@@ -30,50 +30,26 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', False) == 'True'
 
-ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
 
 # Application definition
-
-include(
-    'components/application_definition.py',
-)
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-include(
-    'components/database.py',
-)
-
 # Password validation# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
-include(
-    'components/password_validation.py',
-)
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-include(
-    'components/internationalization.py',
-)
-
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-include(
-    'components/static.py',
-)
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 include(
+    'components/application_definition.py',
+    'components/database.py',
+    'components/password_validation.py',
+    'components/internationalization.py',
+    'components/static.py',
     'components/default_primary_key.py',
 )
-
 
 LOCALE_PATHS = ['movies/locale'] 
