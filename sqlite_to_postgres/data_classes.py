@@ -44,7 +44,7 @@ class PersonFilmwork:
     created_at: datetime
 
 
-table_to_dataclass = {
+TABLE_TO_DATACLASS = {
      'genre' : Genre,
      'person' : Person,
      'film_work' : Filmwork,
