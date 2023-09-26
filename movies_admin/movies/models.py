@@ -1,7 +1,12 @@
+from ast import Import
+from asyncio.log import logger
+from doctest import debug
+import logging
 import uuid
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
+import logging
 
 class UUIDMixin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -71,6 +76,20 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
 
     def __str__(self):
         return self.title 
+        
+    """ def actors(self):
+        queryset = self.persons.filter(personfilmwork__role__icontains='actor').all()
+        logging.info(queryset.query)
+        actors = [p.full_name for p in queryset]
+        logging.info(str(actors))
+        return actors
+    
+    def directors(self):
+        return [person.full_name for person in self.persons.all()]
+    
+    def writers(self):
+        return [person.full_name for person in self.persons.all()]"""
+
 
 class GenreFilmwork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
