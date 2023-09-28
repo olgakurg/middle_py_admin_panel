@@ -5,11 +5,12 @@ from ...models import Filmwork, Person, PersonFilmwork
 import logging
 from django.db.models import Q
 from django.contrib.postgres.aggregates import ArrayAgg
-
+from ...pagination import CustomPagination
 
 class MoviesAPIMixin():
 
     serializer_class = serializers.FilmworkSerializer
+
     
     def get_queryset(self):
         logging.basicConfig(level=logging.INFO, filename="views_new.log", filemode='w')
@@ -41,7 +42,7 @@ class MoviesAPIMixin():
         return films
     
 class MoviesListAPIView(MoviesAPIMixin, ListAPIView):
-    pass
-    
+    pagination_class = CustomPagination
+       
 class MoviesDetailApi(MoviesAPIMixin, RetrieveAPIView):
     pass

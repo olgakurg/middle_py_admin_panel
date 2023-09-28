@@ -13,15 +13,18 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name')
                 
 class StringListSerializer(serializers.ListSerializer):
-    child = serializers.CharField()        
+    child = serializers.CharField()  
+
 
 class FilmworkSerializer(serializers.ModelSerializer):
+    creation_date = serializers.CharField(source = 'created')
     genres = serializers.StringRelatedField(many=True)
     actors = StringListSerializer()
     directors = StringListSerializer()
     writers = StringListSerializer()
 
+
     class Meta:
         model = models.Filmwork
-        fields = ('id', 'title', 'description', 'created', 'type', 'genres', 'actors', 'directors', 'writers')
+        fields = ('id', 'title', 'description', 'creation_date', 'type', 'genres', 'actors', 'directors', 'writers')
         depth = 3
