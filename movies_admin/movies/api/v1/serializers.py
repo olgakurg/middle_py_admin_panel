@@ -1,4 +1,3 @@
-from http import server
 from ... import models
 from rest_framework import serializers
 
@@ -18,13 +17,11 @@ class StringListSerializer(serializers.ListSerializer):
 
 class FilmworkSerializer(serializers.ModelSerializer):
     genres = serializers.StringRelatedField(many=True)
-    #actors = serializers.FloatField()
     actors = StringListSerializer()
-    #directors = StringListSerializer()
-    #writers = StringListSerializer()
+    directors = StringListSerializer()
+    writers = StringListSerializer()
 
     class Meta:
         model = models.Filmwork
-        #fields = ('id', 'title', 'description', 'created', 'type', 'genres', 'actors', 'directors', 'writers')
-        fields = ('id', 'title', 'description', 'created', 'type', 'genres', 'actors')
+        fields = ('id', 'title', 'description', 'created', 'type', 'genres', 'actors', 'directors', 'writers')
         depth = 3
