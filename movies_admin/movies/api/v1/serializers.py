@@ -26,5 +26,5 @@ class FilmworkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Filmwork
-        fields = ('id', 'title', 'description', 'creation_date', 'type', 'genres', 'actors', 'directors', 'writers')
+        fields = ('id', 'title', 'description', 'creation_date', 'type', 'rating', 'genres', 'actors', 'directors', 'writers')
         depth = 3

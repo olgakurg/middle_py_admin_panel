@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 .python-version
+#vurtualens
 venv/
 env/
-.env
+.env/
